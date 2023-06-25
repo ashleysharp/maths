@@ -8,6 +8,7 @@ date: "2023-06-25"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ##Weighted moving average
 ```{r}
 weighted_moving_average <- function(x){
