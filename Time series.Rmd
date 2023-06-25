@@ -8,6 +8,12 @@ date: "2023-06-25"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+```
+
 
 ##Weighted moving average
 ```{r}
@@ -117,3 +123,5 @@ min(sse)
 alpha_var[sse == min(sse)]
 
 ```
+
+
