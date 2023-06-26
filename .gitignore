@@ -7,6 +7,8 @@
 .RDataTmp
 *.ods
 *.xls
+*.sav
+*.odc
 
 # User-specific files
 .Ruserdata
