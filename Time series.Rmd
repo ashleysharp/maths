@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(janitor)
+library(haven)
 ```
 
 
@@ -32,6 +33,11 @@ weighted_moving_average <- function(x){
 q <- (n-1)/2
 
 ##Time series analysis
+```{r}
+airline <- read_sav("M249 data/Book 2/airline.sav")
+```
+
+
 ###Decomposition
 ```{r}
 pseudo_month <- pseudo %>% count(month_floor) %>% 
