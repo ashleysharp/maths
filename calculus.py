@@ -6,6 +6,8 @@ import math
 # Single variable
 
 ## Derivative
+f = lambda x: x**2
+
 def f(x):
     return x**2
 
@@ -16,12 +18,16 @@ def diff(a, n):
     return result
 
 x = sp.Symbol('x')
+f = sp.Function('f')
+g = sp.Function('g')(x)
 
 expr = x ** 2
 expr.subs(x, 3)
 
+f = sp.Lambda(x, x**2)
+
 expr_derivative = sp.diff(expr, x)
-expr_derivative.subs(x, 3)
+expr_derivative.subs(x, f)
 
 ## Riemann integral
 def f(x):
