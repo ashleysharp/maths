@@ -4,14 +4,27 @@ output: html_notebook
 ---
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(ggthemes)
+library(ggpubr)
+library(ggExtra)
+library(gridExtra)
+library(grid)
+library(cowplot)
+library(ggcorrplot)
+library(reshape2)
+library(stats)
+library(ggcorrplot)
 library(Rlab)
 library(BSDA)
 ```
 
-#Discrete
-##UNIFORM
-###Population 
-####1. Model
+# Discrete
+## UNIFORM
+### Population 
+#### 1. Model
 ```{r}
 m_ <- 1
 n <- 7
@@ -26,9 +39,9 @@ dunif
 ggplot(dunif) + geom_point(aes(x = x, y = p))
 ggplot(dunif) + geom_point(aes(x = x, y = d))
 ```
-##BERNOULLI
-###Population 
-####1. Model
+## BERNOULLI
+### Population 
+#### 1. Model
 ```{r}
 #Parameters
 p <- 0.001 #right-skew for p <0.5, symmetric for p = 0.5, left-skew for p >0.5
