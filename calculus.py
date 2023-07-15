@@ -57,6 +57,12 @@ sp.integrate(expr, x)
 sp.integrate(expr, (x, 0, 3))
 
 # Multi-variable
+x, y, z, t = sp.symbols('x y z t')
+g = sp.Lambda((x,y,z), sp.sqrt(x**2+y**2+z**2))
+
+g(x,y,z)
+g(1,2,3)
+g(x,y,z).subs({x:1, y:2, z:3})
 
 def g(x,y):
     return x**2*y**2
@@ -67,7 +73,7 @@ def g(t):
     z = t**2
     return np.array([x,y,z])
 
-x, y, z, t = sp.symbols('x y z t')
+
 
 
 vector_expr = sp.Matrix([sp.cos(t), sp.sin(t), t**2])
