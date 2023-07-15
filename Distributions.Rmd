@@ -4,24 +4,11 @@ output: html_notebook
 ---
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 library(tidyverse)
-library(knitr)
-library(kableExtra)
-library(ggplot2)
-library(ggthemes)
-library(ggpubr)
-library(ggExtra)
-library(gridExtra)
-library(grid)
-library(cowplot)
-library(ggcorrplot)
-library(reshape2)
-library(stats)
-library(ggcorrplot)
 library(Rlab)
 library(BSDA)
 ```
 
-# Discrete
+# Continuous
 ## UNIFORM
 ### Population 
 #### 1. Model
@@ -62,7 +49,61 @@ bernoulli
 ggplot(bernoulli) + geom_point(aes(x = x, y = p))
 ggplot(bernoulli) + geom_point(aes(x = x, y = d))
 ```
-####2. Expected values
+#### 2. Expected values
+```{r}
+mu <- p
+sigma_squared <- p * (1 - p)
+sigma <- sqrt(sigma_squared)
+
+# x <- bernoulli$x
+# m <- bernoulli$m
+#mu <- sum(x*m)
+#sigma_squared <- sum((x-mu)^2*m)
+#sigma_squared <- sum(x
+```
+
+# Discrete
+## UNIFORM
+### Population 
+#### 1. Model
+```{r}
+m_ <- 1
+n <- 7
+range <- m_:n
+mean <- (n + m_) / 2
+variance <- ((n-m_)*(n-m_+2))/12
+print(str_c("m = ", m_, ", n = ", n, ", mean = ", mean, ", variance = ", variance))
+rdunif(10, n, m_)
+dunif <- tibble(x = range, d = 1/(n-m_+1), p = (x-m_+1)/(n-m_+1),
+                xd = x*d)
+dunif
+ggplot(dunif) + geom_point(aes(x = x, y = p))
+ggplot(dunif) + geom_point(aes(x = x, y = d))
+```
+## BERNOULLI
+### Population 
+#### 1. Model
+```{r}
+#Parameters
+p <- 0.001 #right-skew for p <0.5, symmetric for p = 0.5, left-skew for p >0.5
+str_c("p = ", p)
+
+p_2 <- 0.8
+
+#Range
+range <- 0:1
+#p.m.f.
+dber <- function(x, p){
+        p^x*(1-p)^(1-x)  #special case of binomial, where n_ = 1
+}
+bernoulli <- tibble(x = range,
+                d = dber(x, p),
+                p = pbern(x, p))
+bernoulli
+ggplot(bernoulli) + geom_point(aes(x = x, y = p))
+ggplot(bernoulli) + geom_point(aes(x = x, y = d))
+```
+#### 2. Expected values
 ```{r}
 mu <- p
 sigma_squared <- p*(1-p)
@@ -76,7 +117,7 @@ sigma <- sqrt(sigma_squared)
 
 str_c("mu = ", mu, ", sigma_squared = ", sigma_squared, ", sigma = ", round(sigma,2))
 ```
-####3. Sampling distribution of the sample mean, expected values
+#### 3. Sampling distribution of the sample mean, expected values
 ```{r}
 #range: 0-1
 n <- 5000
@@ -92,13 +133,13 @@ sd_X_bar <- sqrt(var_X_bar) #sqrt(p(1-p)/n)
 
 str_c("n = ", n, ", exp_X_bar = ", exp_X_bar, ", var_X_bar = ", round(var_X_bar,3), ", sd_X_bar = ", round(sd_X_bar,3), ", n*p = ", n*p,  ", n*(1-p) = ", n*(1-p))
 ```
-###Sample
+### Sample
 ```{r}
 x <- rbern(n, p) #a single observation of binomial random variable is n observations of a Bernoulli random variable
 n_2 <- 60
 x_2 <- rbern(n_2, p_2)
 ```
-####a. Estimates
+#### a. Estimates
 ```{r}
 sample_mean <- mean(x) #p_hat, sample_total/n, (binomial x/n)
 sample_total <- sum(x) #(x binomial)
@@ -121,14 +162,14 @@ sample_mean_diff <- sample_mean-sample_mean_2
 
 str_c("sample_total = ", sample_total, ", sample_mean = ", sample_mean, ", est_var_X_bar = ", round(est_var_X_bar, 3), ", est_sd_X_bar = ", round(est_sd_X_bar, 3))
 ```
-####b. Likelhood
+#### b. Likelhood
 ```{r}
 #MLE: 
 bernoullin_mle <- tibble(theta = seq(0,1,0.001),
                     m = dbinom(sum(x), n, p = theta)) #single observation of binomial
 ggplot(bernoullin_mle) + geom_line(aes(x = theta, y = m))
 ```
-####c.i. Confidence interval
+#### c.i. Confidence interval
 ```{r}
 alpha <- 0.05
 
@@ -137,14 +178,14 @@ CI <- c(sample_mean - qnorm(1-alpha/2)*est_sd_X_bar,
         sample_mean + qnorm(1-alpha/2)*est_sd_X_bar)
 str_c("sample_mean = ", sample_mean, ", CI = ", paste(round(CI,3), collapse = ", "))
 ```
-####c.ii. Confidence interval difference of proportions
+#### c.ii. Confidence interval difference of proportions
 ```{r}
 CI <- c(sample_mean_diff - qnorm(1-alpha/2)*est_sd_X_bar_diff, 
         sample_mean_diff + qnorm(1-alpha/2)*est_sd_X_bar_diff)
 str_c("sample_mean_diff = ", round(sample_mean_diff,3), ", CI = ", paste(round(CI,3), collapse = ", "))
 ```
 
-####d. Hypothesis test
+#### d. Hypothesis test
 ```{r}
 alpha <- 0.05
 p_0 = 0.3
@@ -163,9 +204,9 @@ str_c("p_value = ", round(p_value, 5))
 
 prop.test(sample_total, n, p_0, correct = FALSE) #CI slightly different??
 ```
-##BINOMIAL
-###Population 
-####1. Model
+## BINOMIAL
+### Population 
+#### 1. Model
 ```{r}
 #number of successes in a sequence of n independent Bernoulli trials with probability p
 n_ <- 3000 #finite range, Bernoulli if n = 1
@@ -188,7 +229,7 @@ binom
 ggplot(binom) + geom_point(aes(x = x, y = p))
 ggplot(binom) + geom_point(aes(x = x, y = d))
 ```
-####2. Expected values
+#### 2. Expected values
 ```{r}
 x <- binom$x
 d <- binom$d
@@ -200,7 +241,7 @@ sigma_squared <- n_*p*(1-p) #quadratic, max 0.25n, var -> mean as p -> 0, mean -
 sigma <- sqrt(sigma_squared)
 str_c("mu (np) = ", mu, ", sigma_squared (np(1-p)) = ", sigma_squared, ", sigma = ", round(sigma,2))
 ```
-####3. Sampling distributions of the sample mean, expected values
+#### 3. Sampling distributions of the sample mean, expected values
 ```{r}
 n <- 50
 exp_X_bar <- mu
@@ -209,9 +250,9 @@ sd_X_bar <- sqrt(var_X_bar)
 
 str_c("n = ", n, ", exp_X_bar = ", exp_X_bar, ", var_X_bar = ", round(var_X_bar,3), ", sd_X_bar = ", round(sd_X_bar,3))
 ```
-##POISSON
-###Population 
-####1. Model
+## POISSON
+### Population 
+#### 1. Model
 ```{r}
 #The Poisson distribution is the limiting distribution of X ~ B(n, l/n)
 #If n is large and p is small (n ≥ 50 and p ≤ 0.05) then the binomial random variable B(n,p) has approximately the same distribution as Poisson(np)
@@ -233,7 +274,7 @@ poisson
 ggplot(poisson) + geom_point(aes(x = x, y = p))
 ggplot(poisson) + geom_point(aes(x = x, y = d))
 ```
-####2. Expected values
+#### 2. Expected values
 ```{r}
 #Mu, sigma
 mu <- lt
@@ -242,7 +283,7 @@ sigma <- sqrt(sigma_squared)
 
 str_c("mu = ", mu, ", sigma_squared = ", sigma_squared, ", sigma = ", round(sigma,3))
 ```
-####3. Sampling distribution of the sample mean, expected values
+#### 3. Sampling distribution of the sample mean, expected values
 ```{r}
 n <- 1000
 exp_X_bar <- mu
@@ -257,7 +298,7 @@ str_c("n = ", n, ", exp_X_bar = ", exp_X_bar, ", var_X_bar = ", round(var_X_bar,
 [1] "n = 10, exp_X_bar = 10, var_X_bar = 1, sd_X_bar = 1"
 
 
-###Sample
+### Sample
 ```{r}
 x <- rpois(n, lt)
 
@@ -269,7 +310,7 @@ x <- rpois(n, lt)
 #E.coli
 #x <- c(3274,3198,3258,3276,3456,3384,3280,3081,3062,3023,3073,2794,3068)
 ```
-####a. Estimates
+#### a. Estimates
 ```{r}
 str_c("lt = ", lt) #can use normal approximation when lt >= 30
 
@@ -280,7 +321,7 @@ est_sd_X_bar <- sqrt(sample_mean/n)
 
 str_c("sample_mean (l_hat) = ", round(sample_mean,3), ", est_var_X_bar = ", round(est_var_X_bar,3), ", est_sd_X_bar = ", round(est_sd_X_bar,3))
 ```
-####b. Likelhood
+#### b. Likelhood
 ```{r}
 theta <- seq(0,max(range), max(range)/1000)
 lp <- function(x, theta){
@@ -292,7 +333,7 @@ lp <- function(x, theta){
 poisson_mle <- tibble(theta = theta, m = lp(x, theta))
 ggplot(poisson_mle) + geom_line(aes(x = theta, y = m))
 ```
-####c. Confidence interval
+#### c. Confidence interval
 ```{r}
 alpha <- 0.05
 str_c("alpha = ", alpha)
@@ -311,9 +352,9 @@ CI*10 = 7.32 11.08
 "CI = 6.693, 10.307"
 
 
-##GEOMETRIC
-###Population 
-####1. Model
+## GEOMETRIC
+### Population 
+#### 1. Model
 ```{r}
 p <- 0.8
 str_c("p = ", p)
@@ -333,7 +374,7 @@ geom
 ggplot(geom) + geom_point(aes(x = x, y = p))
 ggplot(geom) + geom_point(aes(x = x, y = d))
 ```
-####2. Expected values
+#### 2. Expected values
 ```{r}
 #Mu, sigma
 mu <- 1/p #mean < variance for p < 0.5, mean > variance for p > 0.5
@@ -345,14 +386,14 @@ str_c("mu = ", mu, ", sigma_squared = ", sigma_squared, ", sigma = ", sigma)
 ```{r}
 x <- rgeom(100, p) + 1 #shifted geometric distribution
 ```
-####a. Estimates
+#### a. Estimates
 ```{r}
 sample_mean <- mean(x)
 p_hat <- 1/sample_mean #biased
 
 str_c('sample_mean = ', round(sample_mean,2), ", p_hat = ", round(p_hat,2))
 ```
-####b. Likelhood
+#### b. Likelhood
 ```{r}
 theta <- seq(0,1,0.001)
 lg <- function(x, theta){
@@ -362,9 +403,9 @@ lg <- function(x, theta){
 geom_mle <- tibble(theta = theta, m = lg(x, theta))
 ggplot(geom_mle) + geom_line(aes(x = theta, y = m))
 ```
-##NEGATIVE BINOMIAL
-###Population 
-####1. Model
+## NEGATIVE BINOMIAL
+### Population 
+#### 1. Model
 ```{r}
 r <- 5
 p <- 0.5
@@ -381,10 +422,10 @@ ggplot(nb) + geom_point(aes(x = x, y = p))
 ggplot(nb) + geom_point(aes(x = x, y = d))
 ```
 
-#Continuous
-##UNIFORM
-###Population 
-####1. Model
+# Continuous
+## UNIFORM
+### Population 
+#### 1. Model
 ```{r}
 a <- 1
 b <- 5
@@ -398,13 +439,13 @@ unif
 ggplot(unif) + geom_line(aes(x = x, y = p))
 ggplot(unif) + geom_line(aes(x = x, y = d))
 ```
-###Sample
+### Sample
 ```{r}
 x <- runif(10, a, b)
 ```
-##EXPONENTIAL
-###Population 
-####1. Model
+## EXPONENTIAL
+### Population 
+#### 1. Model
 ```{r}
 #For a Poisson process win which events occur at random at rate l, the waiting time between successive events has an exponential distribution with parameter l
 #Parameters
@@ -429,7 +470,7 @@ exponential
 ggplot(exponential) + geom_line(aes(x = x, y = p))
 ggplot(exponential) + geom_line(aes(x = x, y = d))
 ```
-####2. Expected values
+#### 2. Expected values
 ```{r}
 #Mu, sigma
 mu <- 1/l
@@ -439,16 +480,16 @@ sigma <- sqrt(sigma_squared) #mu = sigma
 str_c("mu = ", mu, ", sigma_squared = ", sigma_squared, ", sigma = ", sigma)
 ```
 
-###Sample
+### Sample
 ```{r}
 x <- rexp(10, l)
 ```
-####a. Estimates
+#### a. Estimates
 ```{r}
 sample_mean <- mean(x)
 l_hat = 1/sample_mean #biased
 ```
-####b. Likelhood
+#### b. Likelhood
 ```{r}
 theta <- seq(0,3*l, 3*l/1000)
 
@@ -462,9 +503,9 @@ le <- function(x, theta){
 exponential_mle <- tibble(theta = theta, m = le(x, theta))
 ggplot(exponential_mle) + geom_line(aes(x = theta, y = m))
 ```
-##NORMAL
-###Population 
-####1. Model
+## NORMAL
+### Population 
+#### 1. Model
 ```{r}
 #Parameters
 mu <- 7
@@ -488,11 +529,11 @@ normal
 ggplot(normal) + geom_line(aes(x = x, y = p))
 ggplot(normal) + geom_line(aes(x = x, y = d))
 ```
-####2. Expected values
+#### 2. Expected values
 ```{r}
 str_c("mu = ", mu, ", sigma_squared = ", sigma_squared, ", sigma = ", round(sigma,3))
 ```
-####3. Sampling distributions of the sample mean, expected values
+#### 3. Sampling distributions of the sample mean, expected values
 ```{r}
 n <- 20
 
@@ -501,14 +542,14 @@ var_X_bar <- sigma_squared/n
 sd_X_bar <- sigma/sqrt(n)
 str_c("n = ", n, ", exp_X_bar = ", round(exp_X_bar,3), ", var_X_bar = ", round(var_X_bar,3), ", sd_X_bar = ", round(sd_X_bar,3))
 ```
-####4. Sampling distribution of the sample variance, expected values
+#### 4. Sampling distribution of the sample variance, expected values
 ```{r}
 exp_S_squared <- sigma_squared
 exp_S <- sigma
 str_c("exp_S_squared = ", round(exp_S_squared,3), ", exp_S = ", round(exp_S,3))
 ```
 
-###Sample
+### Sample
 ```{r}
 x <- rnorm(n, mu, sigma)
 
@@ -517,7 +558,7 @@ x_2 <- rnorm(n, mu_2, sigma)
 # x <- c(-6,1,2,4,24,27,33)
 # n <- length(x)
 ```
-####a. Estimates
+#### a. Estimates
 ```{r}
 sample_mean <- mean(x) #mu_hat
 
@@ -538,7 +579,7 @@ est_sd_X_bar <- sample_sd/sqrt(n) #estimate sigma with sample_sd
 
 str_c("sample_mean = ", round(sample_mean,3), ", sample_var = ", round(sample_var,3), ", sample_sd = ", round(sample_sd,3), ", est_var_X_bar = ", round(est_var_X_bar,3), ", est_sd_X_bar = ", round(est_sd_X_bar,3))
 ```
-####c. Confidence interval
+#### c. Confidence interval
 ```{r}
 alpha <- 0.05
 str_c("alpha = ", alpha)
@@ -548,7 +589,7 @@ CI <- c(sample_mean - qnorm(1-alpha/2)*est_sd_X_bar,
         sample_mean + qnorm(1-alpha/2)*est_sd_X_bar)
 str_c("CI = ", paste(round(CI,3), collapse = ", "))
 ```
-####d. Hypothesis test
+#### d. Hypothesis test
 ```{r}
 mu_0 = 7
 critical_values <- c(mu_0 - qnorm(1-alpha/2)*est_sd_X_bar,
@@ -566,7 +607,7 @@ str_c("p_value = ", round(p_value, 5))
 
 z.test(x, mu = mu_0, sigma.x = sample_sd)
 ```
-####e. Power and sample size
+#### e. Power and sample size
 ```{r}
 #When H_1 is true, mu = mu_0 + d, Z - d/sd_X_bar ~ N(0,1)
 d <-  2
@@ -578,7 +619,7 @@ d_z <- d/sd_X_bar
 power <- 1 - pnorm(qnorm(1-alpha/2) - d_z)
 str_c("d = ", d, ", d_z = ", round(d_z,3),  ", power = ", round(power,4))
 ```
-####f. Sample size
+#### f. Sample size
 ```{r}
 gamma <- 0.9
 sample_size <- (sigma_squared/d^2)*(qnorm(1-alpha/2) - qnorm(1-gamma))^2
@@ -586,9 +627,9 @@ sample_size <- (sigma_squared/d^2)*(qnorm(1-alpha/2) - qnorm(1-gamma))^2
 str_c("d = ", d,  ", gamma = ", gamma, ", sample size = ", ceiling(sample_size))
 ```
 
-##STUDENT'S T
-###Population 
-####1. Model
+## STUDENT'S T
+### Population 
+#### 1. Model
 ```{r}
 nu <- n-1
 range <- seq(-4, 4, 0.08) #unbounded 
@@ -601,10 +642,10 @@ t
 ggplot(t) + geom_line(aes(x = x, y = p))
 ggplot(t) + geom_line(aes(x = x, y = d))
 ```
-###Sample
+### Sample
 Use normal
 
-####c.i. Confidence interval
+#### c.i. Confidence interval
 ```{r}
 alpha <- 0.05
 str_c("alpha = ", alpha)
@@ -614,7 +655,7 @@ CI <- c(sample_mean - qt(1-alpha/2, nu)*est_sd_X_bar,
         sample_mean + qt(1-alpha/2, nu)*est_sd_X_bar)
 str_c("CI = ", paste(round(CI,6), collapse = ", "))
 ```
-####c.ii Confidence interval for difference of means
+#### c.ii Confidence interval for difference of means
 ```{r}
 nu_2 <- n + n_2 - 2
 
@@ -624,7 +665,7 @@ CI <- c(sample_mean_diff - qt(1-alpha/2, nu_2)*sample_sd_pooled*sqrt(1/n+1/n_2),
 str_c("CI = ", paste(round(CI,6), collapse = ", "))
 ```
 
-####d. Hypothesis test
+#### d. Hypothesis test
 ```{r}
 mu_0 = 0
 critical_values <- c(mu_0 - qt(1-alpha/2, nu)*est_sd_X_bar,
@@ -644,7 +685,7 @@ str_c("p_value = ", round(p_value, 5))
 t.test(x, mu = mu_0, sigma.x = sample_sd)
 ```
 
-##CHI-SQUARED
+## CHI-SQUARED
 ```{r}
 r <- 6
 range <- seq(0.0001, 5*r, r/20) #x > 0
@@ -657,8 +698,8 @@ chisq
 ggplot(chisq) + geom_line(aes(x = x, y = p))
 ggplot(chisq) + geom_line(aes(x = x, y = d))
 ```
-###Goodness of fit
-####discrete uniform
+### Goodness of fit
+#### discrete uniform
 ```{r}
 m_ <- 1
 n <- 7
@@ -677,7 +718,7 @@ n_parameters <- 0
 r <- nrow(gof) - n_parameters - 1 #k - p - 1
 str_c("n = ", n, ", chi_square = ", round(x2,3), ", p = ", round(1-pchisq(x2, r),3))
 ```
-####geometric
+#### geometric
 ```{r}
 p_hat <- 0.657
 O <- c(71,28,10)
@@ -696,7 +737,7 @@ n_parameters <- 1
 r <- nrow(gof) - n_parameters - 1 #k - p - 1
 str_c("n = ", n, ", p_hat = ", p_hat, ", df = ", r, " , chi_square = ", round(x2,3), ", p = ", round(1-pchisq(x2, r),3))
 ```
-####Poisson
+#### Poisson
 ```{r}
 l_hat <- 0.7
 O <- c(144,91,32,13)
@@ -718,8 +759,8 @@ r <- nrow(gof) - n_parameters - 1 #k - p - 1
 str_c("n = ", n, ", l_hat = ", l_hat, ", df = ", r, ", chi_square = ", round(x2,3), ", p = ", round(1-pchisq(x2, r),3))
 ```
 
-##REGRESSION
-###Population
+## REGRESSION
+### Population
 ```{r}
 #Parameters
 sigma_squared <- 150
@@ -742,14 +783,14 @@ regression_model <- tibble(x = x,
 regression_model
 ggplot(regression_model) + geom_line(aes(x = x, y = z, col = quantile))
 ```
-####Sampling distribution of the estimators, expected values
+#### Sampling distribution of the estimators, expected values
 ```{r}
 n <- 50
 
 exp_alpha_hat <- alpha
 exp_beta_hat <- beta
 ```
-###Sample
+### Sample
 ```{r}
 regression_sample <- tibble(x = runif(n, min(x), max(x)),
                      y = rnorm(x, h(x, alpha_, beta), sigma))
@@ -793,7 +834,7 @@ est_sd_beta_hat <- s/sqrt(S_xx)
 
 ggplot(regression_sample) + geom_point(aes(x = x, y = y)) + geom_line(aes(x = x, y = y_hat))
 ```
-####c.i. Confidence interval for beta
+#### c.i. Confidence interval for beta
 ```{r}
 alpha <- 0.05
 
@@ -803,7 +844,7 @@ CI_beta <- c(
 
 str_c("beta_hat = ", round(beta_hat,3), ", CI_beta = ", paste(round(CI_beta,3), collapse = ", "))
 ```
-####c.ii. Confidence interval for mean response
+#### c.ii. Confidence interval for mean response
 ```{r}
 est_sd_Y_bar <- function(x, s, x_bar, S_xx, n){
         s*sqrt((x-x_bar)^2/S_xx + 1/n)
@@ -816,7 +857,7 @@ regression_sample <- regression_sample %>%
 ggplot(regression_sample) + geom_point(aes(x = x, y = y)) + geom_line(aes(x = x, y = y_hat)) + geom_line(aes(x = x, y = CI_low)) + geom_line(aes(x = x, y = CI_high))
 ```
 
-####c.iii. Prediction interval
+#### c.iii. Prediction interval
 ```{r}
 est_sd_Y <- function(x, s, x_bar, S_xx, n){
         s*sqrt((x-x_bar)^2/S_xx + 1/n + 1)
@@ -828,7 +869,7 @@ regression_sample <- regression_sample %>%
 
 ggplot(regression_sample) + geom_point(aes(x = x, y = y)) + geom_line(aes(x = x, y = y_hat)) + geom_line(aes(x = x, y = CI_low)) + geom_line(aes(x = x, y = CI_high))
 ```
-####d. Hypothesis test for beta
+#### d. Hypothesis test for beta
 ```{r}
 beta_0 = 0
 critical_values <- c(beta_0 - qt(1-alpha/2, n-2)*est_sd_beta_hat,
@@ -839,8 +880,8 @@ standard_critical_values <- c(qt(alpha/2, n-2), qt(1-alpha/2, n-2))
 p_value <- 2*(1-pt(abs(t), n-2))
 ```
 
-##NON-PARAMETRIC
-###Wilkoxon signed rank
+## NON-PARAMETRIC
+### Wilkoxon signed rank
 ```{r}
 #Single sample
 x <- c(19, 35, 36, 28, 37, 10, 25, 34, 30, 39)
@@ -883,7 +924,7 @@ str_c("z = ", round(z, 3))
 str_c("p_value = ", round(p_value, 5))
 ```
 
-###Mann-Whitney
+### Mann-Whitney
 ```{r}
 a = c(101,104,107,107,121,121,124,134,146) 
 b = c(91,93,97,100,101,102,107,114,115,126,131)
@@ -917,12 +958,12 @@ str_c("standard critical values = ", paste(round(standard_critical_values,3),col
 str_c("z = ", round(z, 3))
 str_c("p_value = ", round(p_value, 5))
 ```
-##NOTES
-##To do
+## NOTES
+## To do
 Non-linear regression models and transformations
 Chi-square goodness of fit test for binomial
 
-###Normal probability plot
+### Normal probability plot
 ```{r}
 O <- c(33, 2, 24, 27, 4, 1, -6)
 x <- sort(O)
@@ -945,13 +986,13 @@ for (i in 1:n_trials) {
 #ggplot() + stat_qq_line(aes(sample = x)) + stat_qq(aes(sample = x))
 ggplot() + geom_histogram(aes(x = x), binwidth = 0.00002)
 ```
-###Ladder of powers
+### Ladder of powers
 ```{r}
 df <- tibble(x = rnorm(10, 100, 10), y = x + rnorm(10, 0, 1))
 df
 ggplot(df) + geom_point(aes(x = x, y = y))
 ```
-###Binomial vs Poisson
+### Binomial vs Poisson
 ```{r}
 x <- binom %>% select(x, Binomial = d)
 y <- poisson %>% select(x, Poisson = d) %>% left_join(x, by = "x")
@@ -960,7 +1001,7 @@ ggplot(z) + geom_point(aes(x = x, y = d, col = key))
 ```
 
 
-###Statistical tables
+### Statistical tables
 ```{r}
 x <- 0:9/100
 phi_table <- tibble(z = seq(0,4,0.1), 
