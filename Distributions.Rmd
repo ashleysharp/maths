@@ -190,7 +190,7 @@ sample_mean_diff <- sample_mean-sample_mean_2
 str_c("sample_total = ", sample_total, ", sample_mean = ", sample_mean, ", est_var_X_bar = ", round(est_var_X_bar, 3), ", est_sd_X_bar = ", round(est_sd_X_bar, 3))
 ```
 
-#### b. Likelhood
+#### b. Likelihood
 
 ```{r}
 #MLE: 
